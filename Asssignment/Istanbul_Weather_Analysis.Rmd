@@ -1,0 +1,225 @@
+---
+title: "Istanbul 2009-2019 Weather Report Analysis"
+author: "520444627, 520463743, 520490369, 510425995, 520466179"
+subtitle: "How weather patterns affect Istanbul farmers?"
+date: "University of Sydney | MATH1005 | Lab Class Wednesday 3pm"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    self_contained: yes
+    theme: flatly
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
+---
+
+<br>
+
+# Executive Summary
+This report centres around the 2009-2019 Istanbul Weather data set that is comprised of
+readings of the weather reported in the city. The data set is readily available to the public online
+considering 3896 days considering 11 different weather readings. These readings are given
+according to the date and include the sun and moon rise and set, maximum and minimum
+temperature, average humidity, average rainfall, average wind and the rainfall.
+In this report, the motivations behind the data collection and relevance, the validity of the data
+set in today’s climate and possible limitations with the data set have been considered when
+creating the questions researched.
+In research question one: We found that as temperature rises, humidity tends to fall.
+And finally in research question two: We found that as humidity rises, rainfall tends to increase.
+
+<br>
+
+# Full Report
+
+## Initial Data Analysis (IDA)
+
+The data set was found on Kaggle. In the data each column represents a different variable of
+the weather report while each row represents the different conditions relevant to that day.
+After analysis, along with an 8.61 usability rating, the source World Weather Online found
+the data predominantly matched these direct weather reports. One limitation includes the
+data being three years old with updated data available. Due to the high variability of
+weather with climate change’s effect according to UCAR Centre for Education it presents
+this issue. Upon investigating the data on the website, it found there are limitations created
+via rounding errors. While still posing an issue these discrepancies are rare, for example on
+31/08/2019, ‘World Weather’ said the minimum temperature was 21°C compared to the
+data set with minimum 22°C. Although, like the data set displays, the website likewise
+reported there was 0.5mm of rain and average wind of 22kn. Source ‘Time and Date
+Weather’ enabled this data to be rechecked. This website revealed the minimum
+temperature was 22°C with 0.5mm of rain and 22kn of wind. A third source, TckTckTck again
+supported the reliability of our data identifying there was 0.5mm of rain and 22kn was the
+average wind speed.
+A stakeholder of this data is Turkish farmers. Food markets are popular in Istanbul so it’s
+pivotal for farmers to analyse past weather patterns to assess when certain crops should be
+planted and then harvested to maximise produce and its quality. Hence as stakeholders,
+these farmers would be interested in how the humidity varies with temperature over the
+year and then how this humidity changes with rainfall (affecting crops with variance). The
+government is another stakeholder due to curiosity about future weather when budgeting
+for natural disasters like droughts which are common in Turkey (NASA Earth Observatory).
+
+Variable analysis was conducted uncovering that the variables relating to time were
+incorrectly perceived by R as character variables. However, due to scope of project,
+the quantitative discrete numeric variables MinTemp, MaxTemp, AvgWind, AvgHumidity,
+and AvgPressure were investigated. We also investigated Rainfall, a continuous numerical
+variable and Condition which is a categorical nominal variable.
+```{r}
+Assignmentdata <- read.csv("data/Istanbul Weather Data (2).csv")
+```
+
+```{r}
+str(Assignmentdata)
+summary(Assignmentdata)
+```
+The data has dimensions 3896 entries with 16 columns.
+```{r}
+dim(Assignmentdata)
+```
+By running the code below, it was found that the most prevalent weather condition was
+&#39;sunny&#39; which occurred on 2242 days, followed by &#39;partly cloudy&#39; (781 days).
+```{r}
+barplot(table(Assignmentdata$Condition))
+table(Assignmentdata$Condition)
+```
+
+
+```{r}
+boxplot(Assignmentdata$AvgHumidity)
+boxplot(Assignmentdata$Rain)
+```
+
+This report investigates rainfall against humidity and humidity against average temperature
+via averaging the maximum and mininmum temperatures (approximate average). Average
+humidity was thus analysed individually due to its importance in research questions. It has a
+minimum of 40g/kg and a maximum of 97g/kg, resulting in a range of 57g/kg. With Q1=65
+and Q3= 78, the IQR is 13g/kg. For average rain was a minimum of 0mm and a maximum of
+42mm (one of many outliers), resulting in a range of 42mm. There is a 0.9468mm mean,
+Q1=0 and Q3=0.72 resulting in IQR of 0.72mm.
+
+```{r}
+range(Assignmentdata$Humidity)
+IQR(Assignmentdata$Humidity)
+range(Assignmentdata$Rain)
+IQR(Assignmentdata$Rain)
+```
+
+
+<br>
+
+## Research Question 1: At what temperatures is it most ideal to plant crops for farmers in Istanbul?(How does temperature affect humidity).
+
+Temperature is known to have a meaningful effect on humidity as research shows that as temperature increases the relative humidity decreases. An increase in temperature increases the amount of water air can retain so if there is a constant amount of water vapour an increased temperature will increase the threshold for air to be saturated and thus decrease the relative humidity. This is why it is important to find what temperatures these humidities as high humidity promotes more photosynthesis and crop growth. 
+
+
+```{r}
+cor(Assignmentdata$AvgTemp, Assignmentdata$AvgHumidity)
+plot(Assignmentdata$AvgTemp, Assignmentdata$AvgHumidity)
+l=lm(Assignmentdata$AvgHumidity ~ Assignmentdata$AvgTemp)
+l
+abline(l, col = "red")
+```
+
+ 
+
+As can be seen by this scatter plot the humidity decreases with an increase in temperature. Although the correlation coefficient is low at -0.429 the two variables can still be plotted together in a linear fashion. 
+
+
+```{r}
+plot(Assignmentdata$AvgTemp, l$residuals, ylab='residuals')
+abline(h=0)
+```
+
+The scatter plot above furthers this linear correlation as the plot of the residuals shows that they are randomly scattered along the graph and don't have any pattern. Thus, proving that although the correlation between the two variables is small they do have a direct linear correlation with each other. Thus, at lower average temperatures a higher average humidity can be seen in the data. The regression line plotted for the two variables is: 
+
+```{r}
+print("AvgHumidity = -0.5692(AvgTemp) + 80.4826")
+```
+
+This regression line gives an alright estimate of what the humidity is when given the temperature but of course its main limitation is the low correlation coefficient.
+
+
+
+To further find correlations between humidity and temperature, we have created histograms and box plots to show the interrelationships of average humidity and average temperature daily between 2009-2019, whilst also finding a summary of the data points (as seen in the code below).
+```{r}
+par(mfrow=c(2,2))
+hist(Assignmentdata$AvgTemp)
+hist(Assignmentdata$AvgHumidity)
+boxplot(Assignmentdata$AvgTemp)
+boxplot(Assignmentdata$AvgHumidity)
+
+summary(Assignmentdata$AvgHumidity)
+sd(Assignmentdata$AvgHumidity)
+summary(Assignmentdata$AvgTemp)
+sd(Assignmentdata$AvgTemp)
+```
+As seen in this data, we find that temperature fluctuates more drastically than humidity, and following on from the scatter plot above we see that temperature increases at a higher rate to humidity as temperature is increasing, as the interquartile range of average humidity is smaller than the temperature one. Also, the average temperature histogram has a skewed distribution towards higher temperatures between 25 and 30 degrees, whilst the average humidity has a stronger normal distribution towards 70%, which means that between these temperatures, the humidity is maintained at roughly 70%, which shows that it tends to decrease as temperature rises.
+
+To conclude, our findings mean that low temperatures allows for humidity to be higher, allowing farmers in Istanbul to get stronger crop yields when the temperature is low, as warm air needs more humidity to reach its saturation point[1].
+
+
+
+
+<br>
+
+## What are the trends seen between the average humidity and rainfall in Istanbul and how does this affect farming conditions?
+
+Humidity is the level of water vapour in the air and as water vapour absorbs heat, humidity is a significant factor in the perceived temperature of an area. The higher the humidity percentage the more water vapour in the air and the more chance of rain.
+
+```{r}
+plot(Assignmentdata$AvgHumidity, Assignmentdata$Rain, ylab = "Rain (mm)", xlab = "Humidity (%)", main = "Rain V Humidity")
+
+abline(lm(Assignmentdata$Rain~Assignmentdata$AvgHumidity), col = "orange")
+
+lm(Assignmentdata$Rain~Assignmentdata$AvgHumidity)
+```
+
+This graph illustrates that as the relative humidity percentage (x-axis) increases, the chance of rain (y-axis) also increases. This is illustrated by the line of regression which has the equation Rain = -4.42417 + 0.07521\*Humidity. This shows that as the humidity percentage increases, the average amount of rainfall will increase by a rate of 0.07521mm/percentage. Our model would predict that if the humidity was 80% for a particular day, then there would be 1.59mm of rain. This graph also shows an increase in days with an outlying amount of rain as humidity increases. As an outlier in the data for rainfall is 1.8mm, the frequency of these rain events increases over time. The maximum rainfall within one day of 42mm occurring in November 2019 with a humidity of 84%. This further highlights the correlation between rainfall and humidity. It could also be representative of increasing irregularity of weather events due to climate change.
+
+```{r}
+#Looking at Humidity 
+Assignmentdata$Days_Passed = rev(1:nrow(Assignmentdata))
+
+plot(Assignmentdata$Days_Passed, Assignmentdata$AvgHumidity, xlab = "Days passed", ylab = "Humidity (%)", main = "Humidity over Time")
+
+abline(lm(Assignmentdata$AvgHumidity ~ Assignmentdata$Days_Passed), col = "orange")
+
+lm(Assignmentdata$AvgHumidity ~ Assignmentdata$Days_Passed)
+```
+
+As seen from the linear model in the above graph, the average relative humidity in Istanbul has been roughly declining at a rate of -0.002002% daily. This is due to a steadily rising average temperature which is rising faster than the evaporation rate of water. This decrease in humidity has slightly lowered the frequency of rain in the area, showing a trend of decreasing rainfall. This can be seen in the study 'Decreases in relative humidity across Australia' which details similar trends of decreasing humidity and rainfall in Australia. The study uses data in Australia from 1988-2020, finding a decreasing relative humidity of around -0.8% per year, possibly leading to an increase in water scarcity.
+
+```{r}
+#Residual plot
+l = lm(Assignmentdata$Rain~Assignmentdata$AvgHumidity)
+plot(Assignmentdata$AvgHumidity, l$residuals, xlab = "Humidity (%)", main = "Residual Plot")
+abline(h=0, col = "red")
+```
+
+Despite displaying a correlation between the average humidity and rainfall in Istanbul, this correlation is weak with a coefficient of only 0.2787917. This weak correlation is due to the numerous external factors influencing weather conditions including wind velocity, temperature, and pressure. Along with relative humidity these can factor into the amount of rainfall occurring in an area. This weak correlation is also evident in the residual plot as there is a clear trend from the mean, so it is not homoscedastic. This may mean that the linear model may not be suitable for this data.
+
+```{r}
+cor(Assignmentdata$Rain,Assignmentdata$AvgHumidity, use = "complete")
+```
+
+
+<br>
+
+# References
+
+Earthobservatory.nasa.gov. 2022. Turkey Experiences Intense Drought. [online] Available at:
+&lt;https://earthobservatory.nasa.gov/images/147811/turkey-experiences-intense-drought&gt;
+[Accessed 21 September 2022].
+Tcktcktck.org. 2022. Istanbul, TR Weather In August, 2019 (Weather History Aug, 2019). [online]
+Available at: &lt;https://tcktcktck.org/istanbul/august-2019&gt; [Accessed 21 September 2022].
+Scied.ucar.edu. 2022. Climate Variability | Center for Science Education. [online] Available at:
+&lt;https://scied.ucar.edu/learning-zone/how-climate-works/climate-variability&gt; [Accessed 21
+September 2022].
+
+Timeanddate.com. 2022. Weather for Istanbul, Turkey. [online] Available at:
+&lt;https://www.timeanddate.com/weather/turkey/istanbul&gt; [Accessed 21 September 2022].
+WorldWeatherOnline.com. 2022. World Weather Online. [online] Available at:
+&lt;https://www.worldweatheronline.com&gt; [Accessed 21 September 2022].
+Weather Istanbul Data 2009-2019. (2022). Retrieved 21 September 2022, from https://www.kaggle.com/datasets/vonline9/weather-istanbul-data-20092019
+[1]Laurenzi, T. (2022). How Does Temperature Affect Relative Humidity Meter Readings?. Retrieved 22 September 2022, from https://www.delmhorst.com/blog/relative-humidity-meter-readings
+ShieldSquare Captcha. (2022). Retrieved 22 September 2022, from https://iopscience.iop.org/article/10.1088/1748-9326/ac0aca
+Why is humidity important?. (2022). Retrieved 22 September 2022, from https://www.metoffice.gov.uk/weather/learn-about/weather/types-of-weather/humidity/effects#:~:text=During%20very%20heavy%20rainfall%2C%20where,we're%20likely%20to%20see
